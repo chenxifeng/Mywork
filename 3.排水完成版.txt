@@ -1,0 +1,151 @@
+#include<iostream>
+#include<math.h>
+using namespace std;
+double func1(double d,double o,double v,double q){
+	return (pow(d,2)*(o-sin(o))*v/8-q);
+}
+int main(){
+	int i,j;
+	int l[6]={110,250,170,220,240,240};
+//	double qs[6]={25,38.09,39.56,60.92,66.92,84.36};
+//  设计流量计算
+	double q0=0.486;
+	double f[6]={0,2.2,1.38,2.04,0,2.4};
+	double qb[6],q[6],kz[6],qk[6],qj[7],qs[6];
+	double qjb[6]={25,0,0,7,6,0};
+	double qw[7]={0,4.88,0,6.85,0,8.77,0};
+	double h1[6]={86.20,86.10,86.05,86.00,85.90,85.80},h2[6]={86.10,86.05,86.00,85.90,85.80,85.70};
+	qj[0]=0;
+	for(i=0;i<6;i++){
+		qb[i]=f[i]*q0;
+		q[i]=qb[i]+qw[i];
+		qw[i+1]=qw[i+1]+q[i];
+		kz[i]=2.7/pow(q[i],0.11);
+		if(kz[i]>2.3) kz[i]=2.3;
+		qk[i]=q[i]*kz[i];
+        qj[i+1]=qj[i]+qjb[i];
+		qs[i]=qk[i]+qj[i]+qjb[i];
+	}
+	printf("==============================================================================\n");
+	printf("名称 街区面积 本段流量 转输流量 合计流量 总变化系数 设计流量 集中流量 设计流量\n");
+	printf("编号   F[N]     QB[N]    QW[N]    Q[N]      KZ[N]    QK[N]    QJB[N]   QS[N]  \n");
+	printf(" N     (ha)     (L/s)    (L/s)    (L/s)     (L/s)    (L/s)    (L/s)    (L/s)  \n");
+	printf("==============================================================================\n");
+	for(i=0;i<6;i++){
+		printf(" %1d-%1d  %5.2f    %5.2f     %5.2f    %5.2f    %5.2f     %5.2f    %5.2f    %5.2f\n",i+1,i+2,f[i],qb[i],qw[i],q[i],kz[i],qk[i],qjb[i],qs[i]);
+	}
+//  管径、坡度、流速、充满度计算
+	double v[6]={0.70,0.71,0.72,0.73,0.74,0.75},h[6],d[6],o[6],hd[6],ii[6],hh[6],hil[6],id[6];
+	double hds[6]={0,0,0,0,0,0};
+	int ss;
+	double dd=0,pi=3.141592654,ep=0.001,x,hdmax,n=0.014,o1,o2;
+	for(i=0;i<6;i++){
+		id[i]=(h1[i]-h2[i])/l[i];
+		qs[i]=qs[i]/1000;
+		dd=1000*pow(4*qs[i]/pi/v[i],0.5);
+		ss=1;
+		    if(dd<=350)  d[i]=350,hdmax=0.65;
+		    else if(dd<=400) d[i]=400,hdmax=0.65;
+		    else if(dd<=450) d[i]=450,hdmax=0.65;
+		    else if(dd<=500) d[i]=500,hdmax=0.70;
+		    else if(dd<=550) d[i]=550,hdmax=0.70;
+	    	else if(dd<=600) d[i]=600,hdmax=0.70;
+		    else if(dd<=700) d[i]=700,hdmax=0.70;
+	    	else if(dd<=800) d[i]=800,hdmax=0.70;
+	    	else if(dd<=900) d[i]=900,hdmax=0.70;
+	    	else if(dd<=1000) d[i]=1000,hdmax=0.75;
+	    	else if(dd<=1100) d[i]=1100,hdmax=0.75;
+	    	else if(dd<=1200) d[i]=1200,hdmax=0.75;
+	    	else if(dd<=1300) d[i]=1300,hdmax=0.75;
+//	    	else cout<<"管径过大"<<endl;
+		    d[i]=d[i]/1000;
+		for(;ss!=0;){
+			ss=0;
+			o1=0,o2=2*pi;
+		    if(d[i]<=0.350) hdmax=0.65;
+		    else if(d[i]<=0.400) hdmax=0.65;
+		    else if(d[i]<=0.450) hdmax=0.65;
+		    else if(d[i]<=0.500) hdmax=0.70;
+		    else if(d[i]<=0.550) hdmax=0.70;
+	    	else if(d[i]<=0.600) hdmax=0.70;
+		    else if(d[i]<=0.700) hdmax=0.70;
+	    	else if(d[i]<=0.800) hdmax=0.70;
+	    	else if(d[i]<=0.900) hdmax=0.70;
+	    	else if(d[i]<=1.000) hdmax=0.75;
+	    	else if(d[i]<=1.100) hdmax=0.75;
+	    	else if(d[i]<=1.200) hdmax=0.75;
+	    	else if(d[i]<=1.300) hdmax=0.75;
+//	    	else cout<<"管径过大"<<endl;
+            for(;fabs(o2-o1)>ep;){
+                x=(o1+o2)/2;
+			    if(func1(d[i],o1,v[i],qs[i])*func1(d[i],x,v[i],qs[i])<0) o2=x;
+			    else if(func1(d[i],o1,v[i],qs[i])*func1(d[i],x,v[i],qs[i])>0) o1=x;
+			    else if(func1(d[i],o1,v[i],qs[i])==0) o2=o1;
+		    	else o1=o2=x;
+
+			}
+		o[i]=(o1+o2)/2;
+		hd[i]=0.5*(1-cos(o[i]/2));
+		if(hd[i]>hdmax) {
+			d[i]=d[i]+0.05,ss=1;
+		}
+		}
+		ii[i]=pow(8*n*qs[i]/pow(d[i],2)/(o[i]-sin(o[i]))/pow(d[i]*(1-sin(o[i])/o[i])/4,0.666666666667),2);
+		hh[i]=hd[i]*d[i];
+		hil[i]=ii[i]*l[i];
+	}
+	printf("==============================================================================\n");
+	printf("名称 转输流量 管段长度   管径   地面坡度    坡度     流速    充满度   跌水高度\n");
+	printf("编号  QJ[N]     L[N]     D[N]    ID[N]      I[N]     V[N]    H/D[N]    HDS[N] \n");
+	printf(" N    (L/s)     (m)      (mm)    (0/00)    (0/00)    (m/s)   (m/m)      (m)   \n");
+	printf("==============================================================================\n");
+	for(i=0;i<6;i++){
+		printf(" %1d-%1d   %4.1f    %4d    %5.0f     %5.2f     %5.2f    %5.2f     %5.3f    %5.3f\n",i+1,i+2,qj[i],l[i],1000*d[i],1000*id[i],1000*ii[i],v[i],hd[i],hds[i]);
+	}
+//  标高计算
+	double hg1[6],hg2[6],hs1[6],hs2[6],hmn1[6],hmn2[6],qo[6];
+	double zj[6]={73425,166875,113475,157608,171936,299052};
+	double mm[6]={350,350,350,350,350,350};
+	double wb[6]={120,120,120,120,120,120};
+	hmn1[0]=2;
+	hg1[0]=h1[0]-hmn1[0];
+	hs1[0]=hg1[0]+hh[0];
+	hs2[0]=hs1[0]-hil[0];
+	hg2[0]=hg1[0]-hil[0];
+	hmn2[0]=h2[0]-hg2[0];
+	for(i=1;i<6;i++){
+		if(d[i]==d[i-1]){
+			hs1[i]=hs2[i-1];
+			hg1[i]=hs1[i]-hh[i];
+		}
+		else {
+			hg1[i]=hg2[i-1]+d[i]-d[i-1];
+			hs1[i]=hg1[i]+hh[i];
+		}
+		hg2[i]=hg1[i]-hil[i];
+		hs2[i]=hs1[i]-hil[i];
+		hmn2[i]=h2[i]-hg2[i];
+	    hmn1[i]=h1[i]-hg1[i];
+	}
+	for(i=0;i<6;i++){
+		qo[i]=mm[i]*wb[i]/86400;
+	}
+	printf("==============================================================================\n");
+	printf("名称   降落量   地面标高   地面标高   管内底标高   管内底标高    埋深    埋深 \n");
+	printf("编号   HIL[N]     H[N]      H[N+1]      HG[N,2]    HG[N+1,1]     HMN2    HMN1 \n");
+	printf(" N      (m)       前端       后端        前端         后端       前端    后端 \n");
+	printf("==============================================================================\n");
+	for(i=0;i<6;i++){ 
+		printf(" %1d-%1d  %6.3f     %5.2f      %5.2f       %6.3f       %6.3f      %4.2f   %5.2f\n",i+1,i+2,hil[i],h1[i],h2[i],hg1[i],hg2[i],hmn1[i],hmn2[i]);
+	}
+	printf("==============================================================================\n");
+	printf("名称  人口密度   污水定额   比流量   水面标高   水面标高   水头损失   工程造价\n");
+	printf("编号    MM[N]     WB[N]     QO[N]    HS[N,2]    HS[N+1,1]    HH[N]      ZJ[N] \n");
+	printf(" N     (M/ha)     (L/Md)    (L/sha)    前端       后端        (m)       (元)  \n");
+	printf("==============================================================================\n");
+	for(i=0;i<6;i++){
+		printf(" %1d-%1d   %4.0f      %6.1f     %5.3f     %6.3f     %6.3f      %5.3f    %6.1f\n",i+1,i+2,mm[i],wb[i],qo[i],hs1[i],hs2[i],hh[i],zj[i]);
+	}
+	printf("==============================================================================\n");
+	return 0;
+}
